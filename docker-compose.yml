@@ -36,11 +36,10 @@ services:
       context: .
       dockerfile: ./infra/docker/nginx/Dockerfile
     ports:
-      - 1834:80 #ポートのみを記述
-    # - target: 80
-    #    published: ${WEB_PUBLISHED_PORT:-80}
-    #   protocol: tcp
-    #   mode: host
+      - target: 80
+        published: ${WEB_PUBLISHED_PORT:-80}
+        protocol: tcp
+        mode: host
     volumes:
       - type: bind
         source: ./src
@@ -51,11 +50,10 @@ services:
       context: .
       dockerfile: ./infra/docker/mysql/Dockerfile
     ports:
-      - 1872:80 #ポートのみの記述に変更
-      # - target: 3306
-      #  published: ${DB_PUBLISHED_PORT:-3306}
-      #  protocol: tcp
-      #  mode: host
+      - target: 3306
+        published: ${DB_PUBLISHED_PORT:-3306}
+        protocol: tcp
+        mode: host
     volumes:
       - type: volume
         source: db-store
@@ -67,3 +65,20 @@ services:
       - MYSQL_USER=${DB_USERNAME:-phper}
       - MYSQL_PASSWORD=${DB_PASSWORD:-secret}
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-secret}
+
+  phpmyadmin:
+     image: phpmyadmin/phpmyadmin
+     depends_on:
+      - db
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOSTS=db
+      - PMA_USER=db_user
+      - PMA_PASSWORD=db_password
+    ports:
+      - target: 80
+        published: ${WEB_PUBLISHED_PORT:-80}
+        protocol: tcp
+        mode: host
+    volumes:
+      - ./docker/phpmyadmin/sessions:/sessions
